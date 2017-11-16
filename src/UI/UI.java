@@ -6,12 +6,16 @@
 package UI;
 
 import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import static javax.swing.JOptionPane.ERROR_MESSAGE;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
@@ -28,22 +32,41 @@ public class UI extends JFrame implements ActionListener {
     private JTextField input;
     private JLabel output;
     private JSpinner selector;
+    private JCheckBox numeric;
     
     public UI() {
         super("ROT");
         this.input = new JTextField(20);
         this.output = new JLabel(" ");
-        this.selector = new JSpinner(new SpinnerNumberModel(13, 1, 26, 1));
-        JButton action = new JButton("ROT");
-        action.addActionListener(this);
+        this.output.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
+                    "Output",
+                    TitledBorder.CENTER,
+                    TitledBorder.TOP));
+        this.selector = new JSpinner(new SpinnerNumberModel(13, 0, 26, 1));
+        this.numeric = new JCheckBox("From numbers");
         
         JPanel pane = new JPanel();
         pane.add(this.selector);
-        pane.add(action);
+        pane.add(this.numeric);
+        pane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
+                    "Settings",
+                    TitledBorder.CENTER,
+                    TitledBorder.TOP));
+        
+        JButton action = new JButton("ROT");
+        action.addActionListener(this);
+        
+        JPanel actionPane = new JPanel();
+        actionPane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
+                    "Rotate",
+                    TitledBorder.CENTER,
+                    TitledBorder.TOP));
+        actionPane.add(action);
         
         this.getContentPane().add(new TextFieldScrollPane(this.input), BorderLayout.PAGE_START);
-        this.getContentPane().add(new LabelScrollPane(this.output), BorderLayout.CENTER);
-        this.getContentPane().add(new ButtonScrollPane(pane), BorderLayout.PAGE_END);
+        this.getContentPane().add(this.output, BorderLayout.PAGE_END);
+        this.getContentPane().add(pane, BorderLayout.LINE_START);
+        this.getContentPane().add(actionPane, BorderLayout.LINE_END);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         this.pack();
@@ -52,7 +75,22 @@ public class UI extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        output.setText(Rotation.rotate(input.getText(), (Integer) selector.getValue()));
+        output.setText(" ");
+        if (this.numeric.isSelected())  {
+            String input = "";
+            try {
+                for (String number: this.input.getText().split(" ")) {
+                    input += (char)(Integer.parseInt(number) + 96);
+                }                
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(null, "Non sono stati forniti dei numeri", "Errore", ERROR_MESSAGE);
+                return;
+            }
+            output.setText(Rotation.rotate(input, (Integer) selector.getValue())+ " ");
+        } else {
+            output.setText(Rotation.rotate(this.input.getText(), (Integer) selector.getValue()) + " ");
+        }
+        this.input.requestFocus();
     }
     
     public class TextFieldScrollPane extends JScrollPane {
@@ -66,25 +104,4 @@ public class UI extends JFrame implements ActionListener {
 
     }
     
-    public class LabelScrollPane extends JScrollPane {
-        public LabelScrollPane(JLabel jLabel) {
-            super(jLabel);
-            this.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
-                    "Output",
-                    TitledBorder.CENTER,
-                    TitledBorder.TOP));
-        }
-    
-    }
-    
-    public class ButtonScrollPane extends JScrollPane {
-        public ButtonScrollPane(JPanel content) {
-            super(content);
-            this.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
-                    "Rotate",
-                    TitledBorder.CENTER,
-                    TitledBorder.TOP));
-        }
-    
-    }
 }
